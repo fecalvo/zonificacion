@@ -21,7 +21,7 @@
 pacman::p_load(tidyverse, readxl)
 
 #* lectura y orden----
-v_archivos <- list.files(path = "./R_nuez",
+v_archivos <- list.files(path = "./datos",
                          pattern = "(xlsx$|csv$)",
                          full.names = T)
 
@@ -101,5 +101,7 @@ for(i in seq_along(v_archivos)){
 #*guardar----
 
 # tb_final_csv <- write_csv(tb_final, "./R_nuez/tb_resultados/tb_final_csv.csv")
-
-write.csv2(tb_final, "tb_final.csv")
+# F: la mandé a la nueva ubicación "resultados" dado que por como has escrito 
+# el código si va a una carpeta común con los datos crudos generará nuevas 
+# variables
+write.csv2(tb_final, "resultados/tb_final.csv")

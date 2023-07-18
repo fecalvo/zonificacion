@@ -35,8 +35,10 @@ tb_resumen <- tb_pivot %>%
   ungroup()
 
 #guardo tabla de medidas resumen
+# F: por si quieres conservar la tabla la mandé a la nueva ubicación
+# llamada "resultados"
 # tb_resumen_descriptiva <- 
-# write_csv(tb_resumen, "./R_nuez/tb_resumen_descriptiva.csv")
+write_csv(tb_resumen, "./resultados/tb_resumen_descriptiva.csv")
 
 #graficos exploratorios
 #defino mis preferencias gráficas
@@ -85,7 +87,7 @@ graf_evolucion <- function(tb, x, y, sd, fill, variable){
 g1 <- graf_evolucion(tb_resumen, fecha, media, desvio, sitio, "long")  
 g2 <- graf_evolucion(tb_resumen, fecha, media, desvio, sitio, "ps_sem")
 
-
+# ggarrange me parece algo mejor para unir gráficos que el propio ggplot
 ggpubr::ggarrange(g1,g2)
 
 #para explorar otras opciones de variables a graficar reemplar último argumento
