@@ -122,3 +122,4 @@ graf_cosecha <- function(tb, y, sd, variable){
 graf_cosecha(tb_resumen, media, desvio, "ps_sem")  
 
 #fin---------------------
+
