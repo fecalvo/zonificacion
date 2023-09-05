@@ -6,17 +6,9 @@ archivos <- list.files(path = "./pistacho/datos_horarios",
                        pattern = "(txt$)",
                        full.names = T)
 
-
-data_frame_resultado <- read.table(textConnection(tibble_resultado), 
-                                   widths = ancho_columnas, skip = 2, 
-                                   col.names = c("FECHA", "HORA", "TEMP", "HUM", "PNM", "DD", "FF", "NOMBRE"))
-
-
-col.names(lista_completa) <- c("FECHA", "HORA", "TEMP", "HUM", "PNM", "DD", "FF", "NOMBRE")
-
 archivos
-list.data<-list()
 
+list.data<-list()
 for(i in seq_along(archivos)){
   stringr::str_conv(archivos[i], "UTF-8")
   ancho_columnas <- c(8, 7, 6, 6, 7, 5, 6, 50)
