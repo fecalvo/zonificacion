@@ -105,3 +105,4 @@ for(i in seq_along(v_archivos)){
 # el código si va a una carpeta común con los datos crudos generará nuevas 
 # variables
 write.csv2(tb_final, "resultados/tb_final.csv")
+

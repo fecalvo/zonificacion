@@ -45,6 +45,16 @@ write_csv(tb_resumen, "./resultados/tb_resumen_descriptiva.csv")
 my_theme <- theme_bw() + 
   theme(panel.grid = element_blank())
 
+my_theme <- theme_bw() + theme(text=element_text(family="serif"),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  legend.title=element_text(size = 11),
+  legend.text=element_text(size = 11, hjust = 1.5),
+  axis.text=element_text(size = 11),
+  axis.text.x = element_text(angle = 45, hjust = 1), 
+  axis.title=element_text(size=11,face="bold"), 
+  aspect.ratio = 3/4)
+
 v_colores <- c("cyan2", "cadetblue4", "dodgerblue", "dodgerblue4",
                "green3", "palegreen2", "brown2") 
 
@@ -103,7 +113,7 @@ graf_cosecha <- function(tb, y, sd, variable){
   
   #grafico de barras
   ggplot(tb_cosecha, aes(x = sitio, y = {{y}}, fill = sitio)) + 
-    geom_bar(stat = "identity") +
+    geom_bar(stat = "identity", width = 0.4) +
     geom_errorbar(aes(ymin = {{y}}-{{sd}}, ymax = {{y}}+{{sd}}), width = 0.2) +
     scale_fill_manual(values = c("agua_amarga" = "cyan2", 
                                  "chacon" =  "cadetblue4",
