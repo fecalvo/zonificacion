@@ -1,24 +1,14 @@
 pacman::p_load(tidyverse)
 
-temp_lr <- read.csv2("LR/Libro1.csv", sep = ";")
-temp_qnuts <- read.csv2("LR/qnuts.csv", sep = ";")
+temp_lr <- read.csv2("temperatura/Libro1.csv", sep = ";")
+temp_qnuts <- read.csv2("temperatura/qnuts.csv", sep = ";")
 
-str(temp_lr)
 temp2 <- temp_lr %>% 
   mutate(Fecha = lubridate::dmy(Fecha), 
          Angulos = as.numeric(Angulos), 
          Tilimuqui = as.numeric(Tilimuqui), 
          Miranda = as.numeric(Miranda), 
          Sañogasta = as.numeric(Sañogasta)) 
-
-temp3 <- temp2 %>% 
-  mutate(Mes = format(as.Date(Fecha), "%m-%y")) %>% 
-  arrange(Mes) %>% 
-  na.omit() %>% 
-  group_by(Mes) %>% 
-  summarise(Angulos = mean(Angulos), 
-            Tilimuqui = mean(Tilimuqui), 
-            Sañogasta = mean(Sañogasta))
 
 # media diaria
 temp3 <- temp2 %>% 
@@ -41,23 +31,37 @@ tempq3 <- tempq2 %>%
   group_by(dia) %>% 
   summarise(QNUTS = mean(QNUTS))
 
-tempq3
 diarios <- inner_join(temp3, tempq3)
+
 diarios_long <- pivot_longer(data = diarios, cols = c(Angulos, Tilimuqui, Sañogasta, QNUTS), 
                       names_to = "Estación", values_to = "Temp")
+diarios_long <- diarios_long %>% 
+  mutate(dia = as.Date(dia, format = "%m-%d"))
 
-jpeg("LR/tempdia.jpeg", width = 3000, height = 2000, units = "px", res = 300)
+jpeg("temperatura/tempdia.jpeg", width = 3000, height = 2000, units = "px", res = 300)
 ggplot(data = diarios_long, aes(x = dia, group = Estación)) + 
   geom_line(aes(y = Temp, color = Estación), size = 1) + 
   xlab("") + 
+  scale_y_continuous(limits = c(0, 30), breaks = seq(0, 30, by = 5)) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%d-%b") +
   ylab("Tempereratura media diaria (°C)") +
   theme_bw() +
-  theme(aspect.ratio = 3/4, axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+  theme(aspect.ratio = 3/4, 
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1), 
+        panel.grid.minor = element_blank()) 
 dev.off()
-  
-  
 
-  
+# media mensual 
+temp3 <- temp2 %>% 
+  mutate(Mes = format(as.Date(Fecha), "%m-%y")) %>% 
+  arrange(Mes) %>% 
+  na.omit() %>% 
+  group_by(Mes) %>% 
+  summarise(Angulos = mean(Angulos), 
+            Tilimuqui = mean(Tilimuqui), 
+            Sañogasta = mean(Sañogasta))
+
+
 min3 <- temp2 %>% 
   mutate(Mes = format(as.Date(Fecha), "%m-%y")) %>% 
   arrange(Mes) %>% 
