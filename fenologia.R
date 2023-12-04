@@ -130,7 +130,7 @@ d_prop %>%
   geom_hline(yintercept = 0.8, color = "red", linetype = "dashed") +
   
   ylim(0, 1) +
-  xlim(280, 320) +
+  xlim(280, 340) +
   labs(x = "Día Juliano",
        y = "Proporción") +
   facet_wrap(~str_to_title(sitio)) +
