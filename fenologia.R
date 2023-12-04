@@ -5,10 +5,11 @@
 pacman::p_load(tidyverse, readxl, lubridate, ggpmisc)
 
 #1: armo base de datos
-
-v_archivos <- list.files(path = "./datos",
+v_archivos <- list.files(path = "./datos/fenologia",
                          pattern = "(xlsx$|csv$)",
                          full.names = T)
+
+
 
 for (i in seq_along(v_archivos)) {
   print(v_archivos[i])
@@ -30,6 +31,7 @@ for (i in seq_along(v_archivos)) {
     read_xlsx(sheet = hojas_excel[j]) %>% 
     mutate(sitio = c_sitio, 
            .before = 1,
+           Df = as.numeric(Df), 
            brote = as.character(brote))
   
   #concateno hojas excel en una misma tabla
@@ -108,17 +110,34 @@ d_prop <- d_sum %>%
 
 
 #3: grafico
-ggplot(d_prop, aes(x = dia_juliano, y = Estado_f)) +
+interceptos <- d_prop %>% 
+  mutate(iasd = (0.8 - coef(lm(Estado_f ~ dia_juliano))[[1]]) / coef(lm(Estado_f ~ dia_juliano))[[2]]) %>% 
+  group_by(sitio) %>% 
+  summarise(inter = mean(iasd))
+d_prop <- left_join(d_prop, interceptos, by = "sitio")
+
+jpeg("graficos/estaciones.jpeg", width = 6000, height = 4000, 
+     units = "px", res = 600) 
+
+d_prop %>%
+  ggplot(aes(x = dia_juliano, y = Estado_f, group = sitio)) +
   geom_point() +
-  geom_smooth(method = "lm", se = F) +
+  geom_smooth(aes(color = sitio), method = "lm", se = FALSE) +
   stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep = "")),
-               parse = TRUE, size = 3) +
+               parse = TRUE, size = 3, label.y = 0.99) +
+  geom_vline(aes(xintercept = inter), color = "red", linetype = "dashed") +
+  scale_color_manual(values = c("purple", "blue", "purple", "purple", "purple", "purple", "blue", "blue")) +
+  geom_hline(yintercept = 0.8, color = "red", linetype = "dashed") +
+  
   ylim(0, 1) +
   xlim(280, 320) +
-  labs(x = "Día Juliano", 
+  labs(x = "Día Juliano",
        y = "Proporción") +
   facet_wrap(~str_to_title(sitio)) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        legend.position = "none")  
 
+dev.off()
+  
