@@ -64,14 +64,16 @@ for (i in seq_along(v_archivos)) {
 
 data <- 
   tb_final %>% 
+  mutate_all(~replace(., is.na(.), 0)) %>% 
   mutate(sitio = as.factor(sitio),
          fecha = lubridate::ymd(fecha),
          dia_juliano = lubridate::yday(fecha), .after = fecha) %>% 
   mutate(yf = (Cf+Cf2+Df+Df2+Ef+Ff+Ff1+Ff2+Ff3+Gf),
          yf_d = (Ef+Ff+Ff1+Ff2+Ff3+Gf),
-         ym = (Amg+Bm+Cm+Dm2+Fm+Fm2+Gm+Hm))
+         ym = (Amg+Bm+Cm+Dm+Dm2+Fm+Fm2+Gm+Hm), 
+         ym_d = (Cm+Dm+Dm2+Fm+Fm2+Gm))
 
-#acumular estadio final
+#acumular estadio final - fenología femenina
 d_sum <- data %>% 
   filter(yf_d > 0) %>% 
   group_by(sitio, dia_juliano) %>% 
@@ -126,7 +128,7 @@ d_prop %>%
   stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep = "")),
                parse = TRUE, size = 3, label.y = 0.99) +
   geom_vline(aes(xintercept = inter), color = "red", linetype = "dashed") +
-  scale_color_manual(values = c("purple", "blue", "purple", "purple", "purple", "purple", "blue", "blue")) +
+  scale_color_manual(values = c("purple", "blue", "darkgreen", "purple", "purple", "purple", "purple", "blue", "blue")) +
   geom_hline(yintercept = 0.8, color = "red", linetype = "dashed") +
   
   ylim(0, 1) +
@@ -141,3 +143,70 @@ d_prop %>%
 
 dev.off()
   
+# floracion masculina ####
+names(data)
+dm_sum <- data %>% 
+  filter(ym_d > 0) %>% 
+  group_by(sitio, dia_juliano) %>% 
+  summarise(sAmg = sum(Amg),
+            sBm = sum(Bm), 
+            sCm = sum(Cm), 
+            sDm = sum(Dm),
+            sDm2 = sum(Dm2),
+            sEm = sum (Em),
+            sFm = sum(Fm),
+            sFm2 = sum(Fm2), 
+            sGm = sum(Gm),
+            sym = sum(ym),
+            sym_d = sum(yf_d))
+
+ym_d_t <- dm_sum %>% 
+  group_by(sitio) %>% 
+  filter(sym_d == max(sym_d))
+
+dm_prop <- dm_sum %>% 
+  filter(sym_d > 0) %>%
+  group_by(sitio) %>% 
+  mutate(Amg = (sAmg/max(sym_d)), 
+         Bm = (sBm/max(sym_d)), 
+         Cm = (sCm/max(sym_d)), 
+         Dm = (sDm/max(sym_d)),
+         Dm2 = (sDm2/max(sym_d)),
+         Em = (sEm/max(sym_d)),
+         Fm = (sFm/max(sym_d)),
+         Fm2 = (sFm2/max(sym_d)), 
+         Gm = (sGm/max(sym_d)), 
+         Estado_f = Fm+Fm2+Gm) %>% 
+  select(sitio, dia_juliano, "Cm":"Estado_f") %>% 
+  summarise(jdaymin = min(dia_juliano), 
+            jdaymax = max(dia_juliano))
+dm_prop
+dm_prop <- left_join(d_prop, dm_prop, by = "sitio")
+
+jpeg("graficos/flormf.jpeg", width = 6000, height = 4000, 
+     units = "px", res = 600) 
+dm_prop %>%
+  ggplot(aes(x = dia_juliano, y = Estado_f, group = sitio)) +
+  geom_rect(aes(xmin = jdaymin, xmax = jdaymax, ymin = -Inf, ymax = Inf), 
+            fill = "#f6edc3") +
+  geom_point() +
+  geom_smooth(aes(color = sitio), method = "lm", se = FALSE) +
+  scale_color_manual(values = c("purple", "blue", "darkgreen", 
+                                "purple", "purple", "purple", 
+                                "purple", "blue", "blue")) +
+  stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep = "")),
+               parse = TRUE, size = 3, label.y = 0.1, label.x = 0.95) +
+  geom_vline(aes(xintercept = inter), color = "red", linetype = "dashed") +
+  geom_vline(aes(xintercept = jdaymin), color = "darkgreen") +
+  geom_vline(aes(xintercept = jdaymax), color = "darkgreen") +
+  
+  geom_hline(yintercept = 0.8, color = "red", linetype = "dashed") +
+  xlim(280, 340) +
+  labs(x = "Día Juliano",
+       y = "Proporción") +
+  facet_wrap(~str_to_title(sitio)) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "none")  
+dev.off()
