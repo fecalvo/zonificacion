@@ -312,8 +312,6 @@ b <- pivot_longer(tabla_mayo_sep, cols = c("CAT_La_Rinconada", "LR_Angulos",
                                             "MZA_Los_Sauces", "MZA_San_Martin"),
                   names_to = "Sitio", values_to = "PF")
 
-
-
 jpeg("graficos/PF.jpeg", width = 6000, height = 3800, 
      units = "px", res = 850) 
 b %>% arrange(Sitio) %>% 
@@ -321,6 +319,15 @@ b %>% arrange(Sitio) %>%
   ggplot(aes(x = as.Date(JDay, origin="2023-01-01"), 
              y = PF)) +
   geom_smooth(aes(color = Sitio), size = 1, se = F) +
+  scale_colour_discrete(
+    labels = c("CAT_La_Rinconada" = "CAT - La Rinconada",
+               "LR_Angulos" = "LR - Angulos",
+               "LR_Miranda" = "LR - Miranda", 
+               "LR_Tilimuqui" = "LR - Tilimuqui", 
+               "MZA_Augua_Amarga" = "MZA - Agua Amarga", 
+               "MZA_La_Consulta" = "MZA - La Consulta", 
+               "MZA_Los_Sauces" = "MZA - Los Sauces", 
+               "MZA_San_Martin" = "MZA - San Martín")) +
   scale_y_continuous(limits = c(0, 70), breaks = seq(0, 70, by = 10)) +
   labs(color = element_blank(), x = "") +
   ylab("Porciones de frío acumuladas (2023)") +
@@ -329,10 +336,12 @@ b %>% arrange(Sitio) %>%
         plot.title = element_text(hjust = 0.5),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
+        legend.text = element_text(size = 12),
         axis.text.x = element_text(size = 16),
         axis.text.y = element_text(size = 16),
         axis.title.y = element_text(size = 16, face = "bold"), 
-        title = element_text(size = 18, face = "bold"))
+        title = element_text(size = 18, face = "bold"), 
+        text = element_text(family = "serif"))
 dev.off()
 
 a %>% arrange(Sitio) %>% 

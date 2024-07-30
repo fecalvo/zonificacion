@@ -210,3 +210,30 @@ dm_prop %>%
         panel.grid.minor = element_blank(),
         legend.position = "none")  
 dev.off()
+
+
+a <- dm_prop %>%
+  ggplot(aes(x = dia_juliano, y = Estado_f, group = sitio)) +
+  geom_rect(aes(xmin = jdaymin, xmax = jdaymax, ymin = -Inf, ymax = Inf), 
+            fill = "#f6edc3") +
+  geom_point() +
+  geom_smooth(aes(color = sitio), method = "lm", se = FALSE) +
+  scale_color_manual(values = c("purple", "blue", "darkgreen", 
+                                "purple", "purple", "purple", 
+                                "purple", "blue", "blue")) +
+  stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep = "")),
+               parse = TRUE, size = 3, label.y = 0.1, label.x = 0.95) +
+  geom_vline(aes(xintercept = inter), color = "red", linetype = "dashed") +
+  geom_vline(aes(xintercept = jdaymin), color = "darkgreen") +
+  geom_vline(aes(xintercept = jdaymax), color = "darkgreen") +
+  
+  geom_hline(yintercept = 0.8, color = "red", linetype = "dashed") +
+  xlim(280, 340) +
+  labs(x = "Día Juliano",
+       y = "Proporción") +
+  facet_wrap(~str_to_title(sitio)) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = "none")  
+
