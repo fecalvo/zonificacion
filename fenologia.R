@@ -112,12 +112,28 @@ d_prop <- d_sum %>%
 
 
 #3: grafico
-interceptos <- d_prop %>% 
+interceptos <- d_prop[-c(10:12),]  %>% 
   mutate(iasd = (0.8 - coef(lm(Estado_f ~ dia_juliano))[[1]]) / coef(lm(Estado_f ~ dia_juliano))[[2]]) %>% 
   group_by(sitio) %>% 
   summarise(inter = mean(iasd))
 d_prop <- left_join(d_prop, interceptos, by = "sitio")
 
+d_prop <- d_prop[-c(10:12),] %>% 
+  mutate(sitio = recode(sitio, "Catamarca" = "1 - La Paz", 
+                        "Sanogasta" = "2 - Chilecito", 
+                        "Tilimuqui" = "3 - Chilecito",
+                        "Angulos" = "4 - Famatina", 
+                        "Montecaseros" = "5 - San Martín",
+                        "La Consulta" = "6 - San Carlos",
+                        "Los Sauces" = "7 - Tunuyan", 
+                        "Agua Amarga" = "8 - Tupungato"),
+  sitio = factor(sitio, levels = c("1 - La Paz", "2 - Chilecito", 
+                                   "3 - Chilecito", "4 - Famatina", 
+                                   "5 - San Martín", "6 - San Carlos", 
+                                   "7 - Tunuyan", "8 - Tupungato"))) %>% 
+  arrange(sitio)
+
+                    
 jpeg("graficos/estaciones.jpeg", width = 6000, height = 4000, 
      units = "px", res = 600) 
 
@@ -128,14 +144,14 @@ d_prop %>%
   stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep = "")),
                parse = TRUE, size = 3, label.y = 0.99) +
   geom_vline(aes(xintercept = inter), color = "red", linetype = "dashed") +
-  scale_color_manual(values = c("purple", "blue", "darkgreen", "purple", "purple", "purple", "purple", "blue", "blue")) +
+  scale_color_manual(values = c("darkgreen", "blue", "blue", "blue", "purple", "purple", "purple", "purple")) +
   geom_hline(yintercept = 0.8, color = "red", linetype = "dashed") +
   
   ylim(0, 1) +
   xlim(280, 340) +
   labs(x = "Día Juliano",
        y = "Proporción") +
-  facet_wrap(~str_to_title(sitio)) +
+  facet_wrap(~str_to_title(sitio), nrow = 2) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -180,10 +196,24 @@ dm_prop <- dm_sum %>%
   select(sitio, dia_juliano, "Cm":"Estado_f") %>% 
   summarise(jdaymin = min(dia_juliano), 
             jdaymax = max(dia_juliano))
-dm_prop
+
+dm_prop <- dm_prop[-4,] %>% mutate(sitio = recode(sitio, "Catamarca" = "1 - La Paz", 
+                        "Sanogasta" = "2 - Chilecito", 
+                        "Tilimuqui" = "3 - Chilecito",
+                        "Angulos" = "4 - Famatina", 
+                        "Montecaseros" = "5 - San Martín",
+                        "La Consulta" = "6 - San Carlos",
+                        "Los Sauces" = "7 - Tunuyan", 
+                        "Agua Amarga" = "8 - Tupungato"),
+         sitio = factor(sitio, levels = c("1 - La Paz", "2 - Chilecito", 
+                                          "3 - Chilecito", "4 - Famatina", 
+                                          "5 - San Martín", "6 - San Carlos", 
+                                          "7 - Tunuyan", "8 - Tupungato"))) %>% 
+  arrange(sitio)
+
 dm_prop <- left_join(d_prop, dm_prop, by = "sitio")
 
-jpeg("graficos/flormf.jpeg", width = 6000, height = 4000, 
+jpeg("graficos/flormf.jpeg", width = 5000, height = 4000, 
      units = "px", res = 600) 
 dm_prop %>%
   ggplot(aes(x = dia_juliano, y = Estado_f, group = sitio)) +
@@ -191,9 +221,7 @@ dm_prop %>%
             fill = "#f6edc3") +
   geom_point() +
   geom_smooth(aes(color = sitio), method = "lm", se = FALSE) +
-  scale_color_manual(values = c("purple", "blue", "darkgreen", 
-                                "purple", "purple", "purple", 
-                                "purple", "blue", "blue")) +
+  scale_color_manual(values = c("darkgreen", "blue", "blue", "blue", "purple", "purple", "purple", "purple")) +
   stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep = "")),
                parse = TRUE, size = 3, label.y = 0.1, label.x = 0.95) +
   geom_vline(aes(xintercept = inter), color = "red", linetype = "dashed") +
@@ -204,7 +232,7 @@ dm_prop %>%
   xlim(280, 340) +
   labs(x = "Día Juliano",
        y = "Proporción") +
-  facet_wrap(~str_to_title(sitio)) +
+  facet_wrap(~str_to_title(sitio), nrow = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -212,7 +240,7 @@ dm_prop %>%
 dev.off()
 
 
-a <- dm_prop %>%
+dm_prop %>%
   ggplot(aes(x = dia_juliano, y = Estado_f, group = sitio)) +
   geom_rect(aes(xmin = jdaymin, xmax = jdaymax, ymin = -Inf, ymax = Inf), 
             fill = "#f6edc3") +
