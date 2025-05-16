@@ -1,32 +1,52 @@
 pacman::p_load(tidyverse, FactoMineR, nlme, emmeans, multcomp, multcompView, 
                magrittr, factoextra, corrplot, lubridate, magick, ggpubr, ggrepel)
 
-datos <- read.csv("tablas/perfil.csv", sep = ";")
+datos <- read.csv2("datos/perfil.csv", sep = ";")
 
 datos %<>% mutate(Temporada = as.factor(Temporada), 
-                  Tratamiento = as.factor(Tratamiento), 
-                  Bloque = as.factor(Bloque))
+                  Departamento = as.factor(Departamento), 
+                  c18.1 = (c18.1.c+c18.1.t)) %>% 
+  dplyr::select(Temporada, Departamento, mg, c16, c18, c18.1, c18.2, c18.3)
 
-# mlm perfil AAGG ####
-# Tratamientos - Temporada 1
-
-# emm_options(opt.digits = F)
-# aumentar decimales
-
-perfil_1 <- datos %>% 
-  filter(Temporada == 1)
-
-for (i in colnames(perfil_1[c(4:8)])) {
+for (i in colnames(datos[c(3:length(datos))])) {
   print(cat(paste("---------------------------------------", "\n",
-                  "Temporada 1 | AAGG  ---> ", i, "\n", 
+                  "Variable  ---> ", i, "\n", 
                   "---------------------------------------", "\n")))
-  variable = perfil_1[,i]
-  lme_cer <- lme(variable ~ factor(Tratamiento), random = ~ 1 | Bloque, 
-                 data = perfil_1)
+  variable = datos[[i]]
+  lme_cer <- lme(variable ~ factor(Temporada), random = ~ 1 | Departamento, 
+                 data = datos)
   print(anova(lme_cer))
-  mult <- emmeans(lme_cer, pairwise ~ Tratamiento)
+  mult <- emmeans(lme_cer, pairwise ~ Temporada)
   print(cld(mult, alpha = 0.05, Letters = letters))
 }
+
+for (i in colnames(datos[c(3:length(datos))])) {
+  print(cat(paste("---------------------------------------", "\n",
+                  "Variable  ---> ", i, "\n", 
+                  "---------------------------------------", "\n")))
+  variable = datos[[i]]
+  lme_cer <- lme(variable ~ factor(Departamento), random = ~ 1 | Temporada, 
+                 data = datos)
+  print(anova(lme_cer))
+  mult <- emmeans(lme_cer, pairwise ~ Departamento)
+  print(cld(mult, alpha = 0.05, Letters = letters))
+}
+
+for (i in colnames(datos[c(3:length(datos))])) {
+  cat("---------------------------------------\n",
+      "Variable  ---> ", i, "\n", 
+      "---------------------------------------\n")
+  variable = datos[[i]]
+    modelo <- lm(variable ~ factor(Temporada) * factor(Departamento), data = datos)
+  print(anova(modelo))
+  mult <- emmeans(modelo, pairwise ~ Temporada*Departamento)
+  print(cld(mult, alpha = 0.05, Letters = letters))
+}
+
+
+
+
+
 
 perfil_2 <- datos %>% 
   filter(Temporada == 2)

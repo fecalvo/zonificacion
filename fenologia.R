@@ -142,7 +142,7 @@ d_prop %>%
   geom_point() +
   geom_smooth(aes(color = sitio), method = "lm", se = FALSE) +
   stat_poly_eq(aes(label = paste("atop(", ..eq.label.., ",", ..rr.label.., ")", sep = "")),
-               parse = TRUE, size = 3, label.y = 0.99) +
+               parse = TRUE, size = 3, label.y = 0.1, label.x = 0.95) +
   geom_vline(aes(xintercept = inter), color = "red", linetype = "dashed") +
   scale_color_manual(values = c("darkgreen", "blue", "blue", "blue", "purple", "purple", "purple", "purple")) +
   geom_hline(yintercept = 0.8, color = "red", linetype = "dashed") +
@@ -151,11 +151,12 @@ d_prop %>%
   xlim(280, 340) +
   labs(x = "Día Juliano",
        y = "Proporción") +
-  facet_wrap(~str_to_title(sitio), nrow = 2) +
+  facet_wrap(~str_to_title(sitio), nrow = 3) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.position = "none")  
+        legend.position = "none", 
+        strip.text = element_text(size = 12))
 
 dev.off()
   
